@@ -1,0 +1,9 @@
+=== 2025-12-04 15:49 UTC ===
+https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt → added 122114 rules
+https://raw.githubusercontent.com/jackszb/Sukka-AdGuard/main/domains.adblock → added 303195 rules
+https://raw.githubusercontent.com/jackszb/mullvad-to-adguard/main/adguard/categories/adblock/adblock.txt → added 126449 rules
+https://raw.githubusercontent.com/neodevpro/neodevhost/master/adblocker → added 106642 rules
+https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/AWAvenue-Ads-Rule.txt → added 904 rules
+https://big.oisd.nl → added 216125 rules
+https://raw.githubusercontent.com/jackszb/DNSBlocklists/auto-update/Advertising.txt → added 236900 rules
+Total rules after normalization and dedupe: 472416
