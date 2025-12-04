@@ -1,0 +1,145 @@
+name: Update and Generate SRS (Unified)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *' # 每天 03:00 UTC
+
+jobs:
+  update-srs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true
+
+      - name: Install sing-box
+        run: |
+          set -euo pipefail
+          curl -fsSL https://sing-box.app/install.sh | sh
+
+      - name: Create rules list
+        run: |
+          set -euo pipefail
+          mkdir -p rules logs
+          rm -f rules_list.txt merged_raw.txt final_filter.txt || true
+
+          RULE_URLS=(
+            "https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt"
+            "https://raw.githubusercontent.com/jackszb/Sukka-AdGuard/main/domains.adblock"
+            "https://raw.githubusercontent.com/jackszb/mullvad-to-adguard/main/adguard/categories/adblock/adblock.txt"
+            "https://raw.githubusercontent.com/neodevpro/neodevhost/master/adblocker"
+            "https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/AWAvenue-Ads-Rule.txt"
+            "https://big.oisd.nl"
+            "https://raw.githubusercontent.com/jackszb/DNSBlocklists/auto-update/Advertising.txt"
+          )
+
+          for URL in "${RULE_URLS[@]}"; do
+            echo "$URL" >> rules_list.txt
+          done
+
+      - name: Download, normalize, merge, dedupe and log filters
+        run: |
+          set -euo pipefail
+          total_rules=0
+          LOGFILE="logs/rules_update.log"
+          echo "=== $(date -u +"%Y-%m-%d %H:%M UTC") ===" >> "$LOGFILE"
+
+          while IFS= read -r URL || [ -n "$URL" ]; do
+            URL="$(echo "$URL" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+            [ -z "$URL" ] && continue
+            case "$URL" in \#*) continue ;; esac
+
+            echo "Downloading: $URL"
+            FNAME="rules/$(echo -n "$URL" | sha1sum | cut -d' ' -f1).txt"
+
+            if curl --fail --retry 3 --retry-delay 5 -L -o "$FNAME" "$URL"; then
+              echo "Downloaded: $URL → $FNAME"
+            else
+              echo "Warning: failed to download $URL (skipped)"
+              continue
+            fi
+
+            rules_count_before=$(wc -l < merged_raw.txt || echo 0)
+            awk '
+              function trim(s){ sub(/^[ \t\r\n]+/,"",s); sub(/[ \t\r\n]+$/,"",s); return s }
+              {
+                line = $0
+                sub(/\r$/,"",line)
+                line = trim(line)
+                if (line=="" ) next
+                if (match(line,/^[!#]/)) next
+                if (substr(line,1,2) == "@@") next
+
+                # 忽略 IP/hosts 规则 (0.0.0.0 或 127.0.0.1 开头)
+                if (match(line,/^(0\.0\.0\.0|127\.0\.0\.1)[ \t]+/)) next
+
+                # 保留 AdGuard 标准规则
+                if (match(line,/^\|\|[A-Za-z0-9.-]+\^/)) { print line; next }
+
+                # 纯域名
+                if (match(line,/^([A-Za-z0-9.-]+)$/,m)) { print "||"m[1]"^"; next }
+
+                # URL
+                if (match(line,/^[a-zA-Z]+:\/\//)) {
+                  gsub(/^[a-zA-Z]+:\/\//,"",line)
+                  split(line,parts,"/")
+                  host = parts[1]
+                  sub(/:[0-9]+$/,"",host)
+                  if (host ~ /[A-Za-z0-9.-]+/) { print "||"host"^" }
+                  next
+                }
+
+                # 正则规则 /.../
+                if (match(line,/^\/.*\/$/)) { print line; next }
+
+                # 通配符规则包含 *
+                if (index(line,"*")>0) {
+                  gsub(/\*/,".*",line)
+                  print "/"line"/"
+                  next
+                }
+              }
+            ' "$FNAME" >> merged_raw.txt
+
+            rules_count_after=$(wc -l < merged_raw.txt)
+            added=$((rules_count_after - rules_count_before))
+            total_rules=$((total_rules + added))
+            echo "$URL → added $added rules" | tee -a "$LOGFILE"
+          done < rules_list.txt
+
+          if [ -f merged_raw.txt ]; then
+            sed '/^\s*$/d' merged_raw.txt | sort -u > final_filter.txt
+            final_count=$(wc -l < final_filter.txt)
+            echo "Total rules after normalization and dedupe: $final_count" | tee -a "$LOGFILE"
+          else
+            echo "No rules downloaded. Exiting." | tee -a "$LOGFILE"
+            exit 0
+          fi
+
+      - name: Convert to binary SRS
+        run: |
+          set -euo pipefail
+          if ! sing-box rule-set convert --type adguard --output adguard-filter.srs final_filter.txt; then
+            echo "SRS conversion failed!"
+            exit 1
+          fi
+          ls -lh adguard-filter.srs
+
+      - name: Commit and push updated SRS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase || true
+          git add adguard-filter.srs final_filter.txt logs/rules_update.log || true
+          if ! git diff --cached --quiet; then
+            DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
+            git commit -m "Update AdGuard SRS - Updated on $DATE"
+            git push origin HEAD:main
+          else
+            echo "No changes to commit"
+          fi
