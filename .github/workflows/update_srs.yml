@@ -31,9 +31,8 @@ jobs:
             "https://raw.githubusercontent.com/jackszb/mullvad-to-adguard/main/adguard/categories/adblock/adblock.txt"
             "https://raw.githubusercontent.com/neodevpro/neodevhost/master/adblocker"
             "https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/AWAvenue-Ads-Rule.txt"
-            "https://big.oisd.nl"
             "https://raw.githubusercontent.com/jackszb/DNSBlocklists/auto-update/Advertising.txt"
-            "https://raw.githubusercontent.com/jackszb/sing-box-abc/main/httpdns-cn.txt"
+            "https://big.oisd.nl"
           )
 
           for URL in "${RULE_URLS[@]}"; do
