@@ -112,3 +112,12 @@ https://blocklistproject.github.io/Lists/phishing.txt → added 0 rules
 https://blocklistproject.github.io/Lists/malware.txt → added 0 rules
 https://blocklistproject.github.io/Lists/tracking.txt → added 0 rules
 Total rules after normalization and dedupe: 1464434
+=== 2025-12-06 11:03 UTC ===
+https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt → added 120406 rules
+https://raw.githubusercontent.com/jackszb/Sukka-AdGuard/main/domains.adblock → added 304174 rules
+https://raw.githubusercontent.com/jackszb/mullvad-to-adguard/main/adguard/categories/adblock/adblock.txt → added 126449 rules
+https://raw.githubusercontent.com/neodevpro/neodevhost/master/adblocker → added 107192 rules
+https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/AWAvenue-Ads-Rule.txt → added 903 rules
+https://raw.githubusercontent.com/jackszb/DNSBlocklists/auto-update/Advertising.txt → added 233672 rules
+https://big.oisd.nl → added 216827 rules
+Total rules after normalization and dedupe: 473516
