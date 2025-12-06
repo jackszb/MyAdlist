@@ -45,3 +45,12 @@ https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/AWAvenue-Ad
 https://raw.githubusercontent.com/jackszb/DNSBlocklists/auto-update/Advertising.txt → added 237242 rules
 https://big.oisd.nl → added 217547 rules
 Total rules after normalization and dedupe: 473428
+=== 2025-12-06 03:41 UTC ===
+https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt → added 120559 rules
+https://raw.githubusercontent.com/jackszb/Sukka-AdGuard/main/domains.adblock → added 304174 rules
+https://raw.githubusercontent.com/jackszb/mullvad-to-adguard/main/adguard/categories/adblock/adblock.txt → added 126449 rules
+https://raw.githubusercontent.com/neodevpro/neodevhost/master/adblocker → added 107185 rules
+https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/AWAvenue-Ads-Rule.txt → added 903 rules
+https://raw.githubusercontent.com/jackszb/DNSBlocklists/auto-update/Advertising.txt → added 233733 rules
+https://big.oisd.nl → added 217820 rules
+Total rules after normalization and dedupe: 473429
