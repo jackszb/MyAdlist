@@ -33,6 +33,7 @@ jobs:
             "https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/AWAvenue-Ads-Rule.txt"
             "https://raw.githubusercontent.com/jackszb/DNSBlocklists/auto-update/Advertising.txt"
             "https://big.oisd.nl"
+            "https://raw.githubusercontent.com/Tahosol/blist/master/blocklist.txt"
           )
 
           for URL in "${RULE_URLS[@]}"; do
